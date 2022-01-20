@@ -1,28 +1,68 @@
 #!/bin/bash
 # Retrieve balance information for a SpeakOut cellular account
+# Dan Fandrich
 set -e
-echo -n "User: "
-read LOGINNAME
-echo -n "Pw: "
-stty -echo
-read PASS
-stty echo
-echo ''
 
-RECIPIENT=root@localhost
+if [[ "$1" == "--help" ]]; then
+    echo "Usage: $0 [--help] [--quiet] [--alwaysmail] [--nomail]"
+    exit 0
+fi
 
-# Lower limit (in dollars) below which a warning is generated
-LIMIT=5
-# Set to yes to send a mail always, blank to mail only when under limit
-ALWAYSMAIL=yes
+trap 'echo Error encountered in "$STAGE" 1>&2' EXIT
+
+# clear variables before reading the rc file
+account=
+password=
+recipient=
+warnlimit=0
+alwaysmail=
+quiet=
+
+# STAGE is displayed automatically on error to help explain the problem
+STAGE='reading speakoutinforc file'
+source "$HOME/.config/speakoutinforc"
+
+STAGE='missing account'
+test -z "$account" && exit 1
+
+# Add a new password with:
+#  secret-tool store --label="SpeakOut Account" speakout-account "$account"
+if [[ -z "$password" ]]; then
+    STAGE="retrieving password with secret-tool for '$account'"
+    password="$(secret-tool lookup speakout-account "$account")"
+fi
+STAGE='missing password'
+test -z "$password" && exit 1
+
+if [[ "$1" == "--quiet" ]]; then
+    quiet=yes
+    shift
+fi
+
+if [[ "$1" == "--alwaysmail" ]]; then
+    alwaysmail=yes
+    shift
+fi
+
+if [[ "$1" == "--nomail" ]]; then
+    recipient=
+    shift
+fi
+
+if [[ -n "$1" ]]; then
+    STAGE='unknown argument'
+    exit 1
+fi
+
+STAGE='preparation'
 
 readonly UA='User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0'
 
-COOKIES="$(mktemp)"
-FORMFILE="$(mktemp)"
-CONTENTFILE="$(mktemp --suffix=.html)"
-CERTFILE="$(mktemp)"
-trap 'test "$?" -ne 0 && echo Error encountered; rm -f "$COOKIES" "$FORMFILE" "$CONTENTFILE" "$CERTFILE"' EXIT
+readonly COOKIES="$(mktemp)"
+readonly FORMFILE="$(mktemp)"
+readonly CONTENTFILE="$(mktemp --suffix=.html)"
+readonly CERTFILE="$(mktemp)"
+trap 'test "$?" -ne 0 && echo Error encountered in "$STAGE" 1>&2; rm -f "$COOKIES" "$FORMFILE" "$CONTENTFILE" "$CERTFILE"' EXIT
 
 # The web site has an incomplete certificate chain because it is missing this
 # intermediate certificate
@@ -58,59 +98,70 @@ as6xuwAwapu3r9rxxZf+ingkquqTgLozZXq8oXfpf2kUCwA/d5KxTVtzhwoT0JzI
 8ks5T1KESaZMkE4f97Q=
 -----END CERTIFICATE-----
 EOF
+
+STAGE='retrieving login data'
 # Get a session cookie and redirect to the session-specific login URL
-curl --compressed --cacert "$CERTFILE" --silent --fail --retry 3 --cookie-jar "$COOKIES" --location --proto-redir -all,https --max-redirs 5 -o "$CONTENTFILE" -H "$UA" https://www.speakout7eleven.ca/customer/account/
+curl --no-progress-meter --compressed --cacert "$CERTFILE" --fail --retry 3 --max-time 90 --cookie-jar "$COOKIES" --location --proto-redir -all,https --max-redirs 5 -o "$CONTENTFILE" -H "$UA" https://www.speakout7eleven.ca/customer/account/
+
+STAGE='processing login data'
 # Convert to xhtml for manipulation
 tidy -utf8 -asxml -numeric  -f /dev/null --output-file "$CONTENTFILE" "$CONTENTFILE" || test "$?" == 1
 
+STAGE='processing login data (is site under maintenance?)'
 # Get the session-specific POST URL. A failure here will happen during web site maintenance.
-POSTURL="$(xmlstarlet sel -N x=http://www.w3.org/1999/xhtml -t -v '//x:form[@id="login-form"]/@action' "$CONTENTFILE")"
-FORMKEY="$(xmlstarlet sel -N x=http://www.w3.org/1999/xhtml -t -v '//x:form[@id="login-form"]/x:input[@name="form_key"]/@value' "$CONTENTFILE")"
+readonly POSTURL="$(xmlstarlet sel -N x=http://www.w3.org/1999/xhtml -t -v '//x:form[@id="login-form"]/@action' "$CONTENTFILE")"
+readonly FORMKEY="$(xmlstarlet sel -N x=http://www.w3.org/1999/xhtml -t -v '//x:form[@id="login-form"]/x:input[@name="form_key"]/@value' "$CONTENTFILE")"
 
 # Put passwords into a file so they aren't visible to ps
 cat >"$FORMFILE" <<EOF
 -d "form_key=$FORMKEY"
--d "login[username]=$LOGINNAME"
--d "login[password]=$PASS"
+-d "login[username]=$account"
+-d "login[password]=$password"
 -d "send=Login"
 --cookie "form_key=$FORMKEY"
 EOF
-# Log in & download status page
-curl --silent --compressed --cacert "$CERTFILE" --fail --retry 3 --cookie-jar "$COOKIES" --location --proto-redir -all,https --max-redirs 5 -o "$CONTENTFILE" -H "$UA" --config "$FORMFILE" --referer "$POSTURL" "$POSTURL"
 
+STAGE='login and download status'
+# Log in & download status page
+curl --no-progress-meter --compressed --cacert "$CERTFILE" --fail --retry 3 --max-time 90 --cookie-jar "$COOKIES" --location --proto-redir -all,https --max-redirs 5 -o "$CONTENTFILE" -H "$UA" --config "$FORMFILE" --referer "$POSTURL" "$POSTURL"
+
+STAGE='processing status information'
 # Convert to xhtml for manipulation
 tidy -utf8 -asxml -numeric  -f /dev/null --output-file "$CONTENTFILE" "$CONTENTFILE" || test "$?" == 1
 
 BALANCE="$(xmlstarlet sel -N x=http://www.w3.org/1999/xhtml -t -v '//x:div[@class="act-bal"]/x:h2' "$CONTENTFILE")"
 # Strip off the dollar sign
 BALANCE="${BALANCE#$}"
-EXPIRY="$(xmlstarlet sel -N x=http://www.w3.org/1999/xhtml -t -v '//x:span[@id="remaining_date"]' "$CONTENTFILE")"
-PHONENUM="$(xmlstarlet sel -N x=http://www.w3.org/1999/xhtml -t -v '//x:option[@name="sel_speakout_number"][@selected="selected"]/@value' "$CONTENTFILE")"
+readonly EXPIRY="$(xmlstarlet sel -N x=http://www.w3.org/1999/xhtml -t -v '//x:span[@id="remaining_date"]' "$CONTENTFILE")"
+readonly PHONENUM="$(xmlstarlet sel -N x=http://www.w3.org/1999/xhtml -t -v '//x:option[@name="sel_speakout_number"][@selected="selected"]/@value' "$CONTENTFILE")"
 # Format phone number more nicely
-PHONENUM="$(sed -Ee 's/^(...)(...)(.*)$/(\1) \2-\3/' <<< "$PHONENUM")"
+readonly NICEPHONENUM="$(sed -Ee 's/^(...)(...)(.*)$/(\1) \2-\3/' <<< "$PHONENUM")"
 
-if awk "BEGIN {exit !($BALANCE < $LIMIT)}"; then
-    LIMITEXCEEDED=yes
+if awk "BEGIN {exit !($BALANCE < $warnlimit)}"; then
+    readonly LIMITEXCEEDED=yes
 else
-    LIMITEXCEEDED=
+    readonly LIMITEXCEEDED=
 fi
+
+# Write out status info
+test -z "$quiet" && echo "$PHONENUM $BALANCE $EXPIRY"
 
 cat >"$CONTENTFILE" <<EOF
 <!doctype html><html lang="en"><body>
-<h1>SpeakOut cellular account status report for $PHONENUM</h1>
+<h1>SpeakOut cellular account status report for $NICEPHONENUM</h1>
 <p>
 <span style='font-weight: bold; font-size: x-large;'>Balance: \$$BALANCE</span>
 <p>
-As of $(date), the balance remaining on the cellular number $PHONENUM is
+As of $(date), the balance remaining on the cellular number $NICEPHONENUM is
 <span style='font-size: medium'>\$$BALANCE</span> which expires $EXPIRY.
 EOF
 
 if [[ -n "$LIMITEXCEEDED" ]]; then
     cat >>"$CONTENTFILE" <<EOF
-        <span style='color: red; font-weight: bold;'>This is below the warning threshold of \$$LIMIT!</span>
+        <span style='color: red; font-weight: bold;'>This is below the warning threshold of \$$warnlimit!</span>
         <p>
         Add more money to your account now by
-        <a href="https://www.speakout7eleven.ca/userinfo/activation/topup/">choosing an amount here</a>.
+        <a href="https://www.speakout7eleven.ca/userinfo/activation/topup/an/$PHONENUM/">choosing an amount here</a>.
 EOF
 fi
 
@@ -120,8 +171,12 @@ cat >>"$CONTENTFILE" <<EOF
 </body></html>
 EOF
 
-if [[ -n "$LIMITEXCEEDED" || -n "$ALWAYSMAIL" ]]; then
-    mail -s "SpeakOut cellular account status report for $(date +'%B %d, %Y')" -a "$CONTENTFILE" "$RECIPIENT" </dev/null
+if [[ ( -n "$LIMITEXCEEDED" || -n "$alwaysmail" ) && -n "$recipient" ]]; then
+    STAGE='sending e-mail'
+    mail -s "SpeakOut cellular account status report for $(date +'%B %d, %Y')" -a "$CONTENTFILE" "$recipient" </dev/null
+    test -z "$quiet" && echo "Sent account status e-mail to '$recipient'" 1>&2
 fi
 
-# Temporary files are automatically deleted and the end
+STAGE='complete'
+
+# Temporary files are automatically deleted in the trap

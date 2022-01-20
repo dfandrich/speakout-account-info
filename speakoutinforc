@@ -1,0 +1,18 @@
+# speakout-account-info configuration
+#
+# SpeakOut account e-mail
+account=myaccount@example.com
+# SpeakOut account password. When blank, password is retrieved using secret-tool instead.
+# Store such a password securely with the command:
+#   secret-tool store --label="SpeakOut Account" speakout-account "$account"
+# replacing "$account" with the account above
+#password=
+# comma-separated recipient(s) of the e-mail; defaults to empty
+recipient=myaccount@example.com
+# Lower limit (in dollars) below which a warning e-mail is generated; defaults to 0
+warnlimit=5
+# Set to yes to always send an e-mail, regardless of warnlimit, empty to send
+# an e-mail only if the balance goes below warnlimit (default)
+#alwaysmail=yes
+# Set to yes to write no output except in case of error
+#quiet=yes
