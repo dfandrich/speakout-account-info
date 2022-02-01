@@ -125,7 +125,7 @@ STAGE='login and download status'
 # Log in & download status page
 curl --no-progress-meter --compressed --cacert "$CERTFILE" --fail --retry 3 --max-time 90 --cookie-jar "$COOKIES" --location --proto-redir -all,https --max-redirs 5 -o "$CONTENTFILE" -H "$UA" --config "$FORMFILE" --referer "$POSTURL" "$POSTURL"
 
-STAGE='processing status information'
+STAGE='processing status information (wrong password?)'
 # Convert to xhtml for manipulation
 tidy -utf8 -asxml -numeric  -f /dev/null --output-file "$CONTENTFILE" "$CONTENTFILE" || test "$?" == 1
 
