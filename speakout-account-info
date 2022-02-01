@@ -139,8 +139,10 @@ readonly NICEPHONENUM="$(sed -Ee 's/^(...)(...)(.*)$/(\1) \2-\3/' <<< "$PHONENUM
 
 if awk "BEGIN {exit !($BALANCE < $warnlimit)}"; then
     readonly LIMITEXCEEDED=yes
+    readonly BG=pink
 else
     readonly LIMITEXCEEDED=
+    readonly BG=greenyellow
 fi
 
 # Write out status info
@@ -150,7 +152,7 @@ cat >"$CONTENTFILE" <<EOF
 <!doctype html><html lang="en"><body>
 <h1>SpeakOut cellular account status report for $NICEPHONENUM</h1>
 <p>
-<span style='font-weight: bold; font-size: x-large;'>Balance: \$$BALANCE</span>
+<span style='font-weight: bold; font-size: x-large; background-color: $BG; margin: 1em; padding: 0.3em; border-radius: 0.3em; border-style: solid;'>Balance: \$$BALANCE</span>
 <p>
 As of $(date), the balance remaining on the cellular number $NICEPHONENUM is
 <span style='font-size: medium'>\$$BALANCE</span> which expires $EXPIRY.
@@ -158,7 +160,7 @@ EOF
 
 if [[ -n "$LIMITEXCEEDED" ]]; then
     cat >>"$CONTENTFILE" <<EOF
-        <span style='color: red; font-weight: bold;'>This is below the warning threshold of \$$warnlimit!</span>
+        <span style='color: pink; font-weight: bold;'>This is below the warning threshold of \$$warnlimit!</span>
         <p>
         Add more money to your account now by
         <a href="https://www.speakout7eleven.ca/userinfo/activation/topup/an/$PHONENUM/">choosing an amount here</a>.
