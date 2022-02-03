@@ -16,3 +16,5 @@ warnlimit=5
 #alwaysmail=yes
 # Set to yes to write no output except in case of error
 #quiet=yes
+# Set to a mailer that takes a complete message with headers on stdin; defaults to sendmail
+#mailer="sendmail -oi -t"

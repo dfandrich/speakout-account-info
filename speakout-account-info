@@ -10,13 +10,14 @@ fi
 
 trap 'echo Error encountered in "$STAGE" 1>&2' EXIT
 
-# clear variables before reading the rc file
+# set variables to default before reading the rc file
 account=
 password=
 recipient=
 warnlimit=0
 alwaysmail=
 quiet=
+mailer="sendmail -oi -t"
 
 # STAGE is displayed automatically on error to help explain the problem
 STAGE='reading speakoutinforc file'
@@ -175,7 +176,14 @@ EOF
 
 if [[ ( -n "$LIMITEXCEEDED" || -n "$alwaysmail" ) && -n "$recipient" ]]; then
     STAGE='sending e-mail'
-    mail -s "SpeakOut cellular account status report for $(date +'%B %d, %Y')" -a "$CONTENTFILE" "$recipient" </dev/null
+    (
+    echo "To: $recipient"
+    echo "Subject: SpeakOut cellular account status report for $(date +'%B %d, %Y')"
+    echo "Content-Type: text/html; charset=UTF-8"
+    echo "X-Mailer: speakout-account-info"
+    echo ""
+    cat "$CONTENTFILE"
+    ) | $mailer
     test -z "$quiet" && echo "Sent account status e-mail to '$recipient'" 1>&2
 fi
 
