@@ -18,8 +18,10 @@
 
 set -e
 
+readonly VERSION=2022.0
 if [[ "$1" == "--help" ]]; then
     echo "Usage: $0 [--help] [--quiet] [--alwaysmail] [--lowmail]"
+    echo "ver. $VERSION"
     exit 0
 fi
 
@@ -200,7 +202,7 @@ if [[ -n "$recipient" && ( -n "$alwaysmail" || ( -n "$lowmail" && -n "$LIMITEXCE
     echo "To: $recipient"
     echo "Subject: SpeakOut cellular account status report for $(date +'%B %d, %Y')"
     echo "Content-Type: text/html; charset=UTF-8"
-    echo "X-Mailer: speakout-account-info"
+    echo "X-Mailer: speakout-account-info $VERSION"
     echo ""
     cat "$CONTENTFILE"
     ) | $mailer

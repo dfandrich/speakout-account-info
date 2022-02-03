@@ -66,7 +66,7 @@ information and write out the phone number, balance in dollars, and balance
 expiry date on one line separated with spaces. There are a number command-line
 options available to change this behaviour.
 
-`--help` will show a brief list of options.
+`--help` will show a brief list of options and the version number.
 
 `--quiet` will cause the script to act as though `quiet=yes` were found in the
 configuration file.
@@ -107,6 +107,9 @@ failing consistently.
 ## Author
 
 Daniel Fandrich <dan@coneharvesters.com>
+
+See more info at the
+[project home page](https://github.com/dfandrich/speakout-account-info/).
 
 This program is Copyright © 2022 Daniel Fandrich. It is distributed under the
 terms of the GNU General Public License as published by the Free Software
