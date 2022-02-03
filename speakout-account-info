@@ -111,6 +111,7 @@ tidy -utf8 -asxml -numeric  -f /dev/null --output-file "$CONTENTFILE" "$CONTENTF
 STAGE='processing login data (is site under maintenance?)'
 # Get the session-specific POST URL. A failure here will happen during web site maintenance.
 readonly POSTURL="$(xmlstarlet sel -N x=http://www.w3.org/1999/xhtml -t -v '//x:form[@id="login-form"]/@action' "$CONTENTFILE")"
+test -n "$POSTURL"  # Site is probably under maintenance if this is empty
 readonly FORMKEY="$(xmlstarlet sel -N x=http://www.w3.org/1999/xhtml -t -v '//x:form[@id="login-form"]/x:input[@name="form_key"]/@value' "$CONTENTFILE")"
 
 # Put passwords into a file so they aren't visible to ps
