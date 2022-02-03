@@ -149,6 +149,9 @@ tidy -utf8 -asxml -numeric  -f /dev/null --output-file "$CONTENTFILE" "$CONTENTF
 BALANCE="$(xmlstarlet sel -N x=http://www.w3.org/1999/xhtml -t -v '//x:div[@class="act-bal"]/x:h2' "$CONTENTFILE")"
 # Strip off the dollar sign
 BALANCE="${BALANCE#$}"
+# $BALANCE will hold "Account Expired" if the account is expired. We could do something
+# special with this, but it's clear enough in the e-mail already what the problem is
+# without special-casing it.
 readonly EXPIRY="$(xmlstarlet sel -N x=http://www.w3.org/1999/xhtml -t -v '//x:span[@id="remaining_date"]' "$CONTENTFILE")"
 readonly PHONENUM="$(xmlstarlet sel -N x=http://www.w3.org/1999/xhtml -t -v '//x:option[@name="sel_speakout_number"][@selected="selected"]/@value' "$CONTENTFILE")"
 # Format phone number more nicely
