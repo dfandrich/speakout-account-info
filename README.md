@@ -39,25 +39,32 @@ Set `recipient` to one or more comma-separated e-mail addresses which will be
 the recipients of the balance e-mails.
 
 Set `warnlimit` to the dollar amount below which an warning e-mail will be
-sent when the script is run.
+sent when the script is run. `lowmail` must be set to yes for an e-mail to
+actually be sent.
+
+Set `lowmail` to `yes` to have the script send an e-mail whenever the balance
+goes below `warnlimit`.
 
 Set `alwaysmail` to `yes` to have the script send an e-mail every time it is
 run, regardless of the limit. Leave it blank to only mail below the warning
 limit.
 
 Set `quiet` to `yes` to have the script display nothing except on error. Leave
-it blank to have the script write out the phone number, balance in dollars, and
-balance expiry date on one line separated with spaces.
+it blank to have the script display the account information.
 
 Set `mailer` to a command that takes an e-mail message with headers on stdin
 and mails it. This defaults to `sendmail -oi -t`.
 
+The `speakoutinforc` is actually a Bourne shell script so shell quoting rules
+are in effect.
+
 ## Running
 
 Please the file `speakout-account-info` somewhere in your PATH and execute it
-with `speakout-account-info`. It will retrieve the account information and
-e-mail it and/or display the result. There are a number command-line options
-available.
+with `speakout-account-info`. By default, it will retrieve the account
+information and write out the phone number, balance in dollars, and balance
+expiry date on one line separated with spaces. There are a number command-line
+options available to change this behaviour.
 
 `--help` will show a brief list of options.
 
@@ -67,10 +74,10 @@ configuration file.
 `--alwaysmail` will cause the script to act as though `alwaysmail=yes` were
 found in the configuration file.
 
-`--nomail` will cause the script to act as though `nomail=yes` were found in the
-configuration file.
+`--lowmail` will cause the script to act as though `lowmail=yes` were found in
+the configuration file.
 
-Note that the command-line processor is very simplistic and if more than one
+Note that the command-line processor is simplistic and if more than one
 command-line option is given, they must be given in the order above.
 
 The script is well-suited to be run periodically as a cron job. This is
@@ -94,8 +101,8 @@ evening (at the time of this writing), during which time
 *speakout-account-info* will not work.
 
 The account information is retrieved by scraping the account web site, so it is
-liable to be brittle. Check back for an update if it starts failing
-consistently.
+liable to be brittle. Check back for an update to this program if it starts
+failing consistently.
 
 ## Author
 

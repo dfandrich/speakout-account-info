@@ -1,4 +1,4 @@
-# speakout-account-info configuration
+# speakout-account-info example configuration file
 #
 # SpeakOut account e-mail
 account=myaccount@example.com
@@ -8,9 +8,12 @@ account=myaccount@example.com
 # replacing "$account" with the account above
 #password=
 # comma-separated recipient(s) of the e-mail; defaults to empty
-recipient=myaccount@example.com
+recipient=$USER@localhost
 # Lower limit (in dollars) below which a warning e-mail is generated; defaults to 0
+# lowmail must be set to yes for an e-mail to actually be sent.
 warnlimit=5
+# Send an e-mail when the balance goes below warnlimit
+lowmail=yes
 # Set to yes to always send an e-mail, regardless of warnlimit, empty to send
 # an e-mail only if the balance goes below warnlimit (default)
 #alwaysmail=yes

@@ -19,7 +19,7 @@
 set -e
 
 if [[ "$1" == "--help" ]]; then
-    echo "Usage: $0 [--help] [--quiet] [--alwaysmail] [--nomail]"
+    echo "Usage: $0 [--help] [--quiet] [--alwaysmail] [--lowmail]"
     exit 0
 fi
 
@@ -31,6 +31,7 @@ password=
 recipient=
 warnlimit=0
 alwaysmail=
+lowmail=
 quiet=
 mailer="sendmail -oi -t"
 
@@ -60,8 +61,8 @@ if [[ "$1" == "--alwaysmail" ]]; then
     shift
 fi
 
-if [[ "$1" == "--nomail" ]]; then
-    recipient=
+if [[ "$1" == "--lowmail" ]]; then
+    lowmail=yes
     shift
 fi
 
@@ -193,7 +194,7 @@ cat >>"$CONTENTFILE" <<EOF
 </body></html>
 EOF
 
-if [[ ( -n "$LIMITEXCEEDED" || -n "$alwaysmail" ) && -n "$recipient" ]]; then
+if [[ -n "$recipient" && ( -n "$alwaysmail" || ( -n "$lowmail" && -n "$LIMITEXCEEDED" ) ) ]]; then
     STAGE='sending e-mail'
     (
     echo "To: $recipient"
