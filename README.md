@@ -16,7 +16,7 @@ be available in the PATH:
   * [HTML Tidy](https://www.html-tidy.org/)
   * [XMLStarlet](http://xmlstar.sourceforge.net/)
   * a sendmail-compatible MTA
-  * *optional* [libsecret-tools](https://wiki.gnome.org/Libsecret)
+  * *optional* [libsecret-tools](https://wiki.gnome.org/Projects/Libsecret)
 
 ## Configuration
 
