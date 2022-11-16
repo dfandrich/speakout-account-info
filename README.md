@@ -4,6 +4,12 @@
 information for a Canadian SpeakOut cellphone account. It can also send you an
 e-mail with the balance information, or just send you one on a low balance.
 
+It has been tested on a Linux desktop, but should work equally well on other
+POSIX operating systems, Mac OS X, or on Windows with a POSIX environment
+installed (like [msys2](https://www.msys2.org/) or
+[WSL](https://learn.microsoft.com/en-us/windows/wsl/about)), as long as the
+prerequisites listed below are also available.
+
 7-Eleven SpeakOut Wireless™ is a registered trademark of 7-Eleven.
 
 ## Prerequisites
@@ -13,18 +19,19 @@ be available in the PATH:
 
   * [bash](https://www.gnu.org/software/bash/bash.html)
   * [curl](https://curl.se/)
-  * [HTML Tidy](https://www.html-tidy.org/)
-  * [XMLStarlet](http://xmlstar.sourceforge.net/)
-  * a sendmail-compatible MTA
+  * [HTML Tidy](https://www.html-tidy.org/) (tidy)
+  * [XMLStarlet](https://xmlstar.sourceforge.net/) (xmlstarlet)
+  * a sendmail-compatible MTA (sendmail)
   * *optional* [libsecret-tools](https://wiki.gnome.org/Projects/Libsecret)
+    (secret-tool)
 
 ## Configuration
 
-Copy the `speakoutinforc` file to $HOME/.config/ and edit it to match your
-requirements. At minimum, `account` must be set to the e-mail address used to
-log in at https://www.speakout7eleven.ca/.  `password` must also be set to the
-account password, unless it is stored using *secret-tool* in which case it must
-be left empty. In that case, store the password by running the following
+Copy the sample `speakoutinforc` file to $HOME/.config/ and edit it to match
+your requirements. At minimum, `account` must be set to the e-mail address used
+to log in at https://www.speakout7eleven.ca/.  `password` must also be set to
+the account password, unless it is stored using *secret-tool* in which case it
+must be left empty. In that case, store the password by running the following
 command:
 
 ```
@@ -55,8 +62,8 @@ it blank to have the script display the account information.
 Set `mailer` to a command that takes an e-mail message with headers on stdin
 and mails it. This defaults to `sendmail -oi -t`.
 
-The `speakoutinforc` is actually a Bourne shell script so shell quoting rules
-are in effect.
+The `speakoutinforc` file is actually a Bourne shell script so shell quoting
+rules are in effect.
 
 ## Running
 
@@ -85,10 +92,11 @@ straightforward when the password is found in the configuration file, but
 trickier when it is stored with `secret-tool`. In the latter case,
 `secret-tool` will generally attempt to ask for the keyring unlock password on
 each invocation, which will fail because the cron job has no screen or tty on
-which to request it. To avoid this, start a long-running D-Bus session and use
-`secret-tool` to unlock the keyring once in that session manually. Then, ensure
-the `DBUS_SESSION_BUS_ADDRESS` environment variable for the cron job is set to
-use that D-Bus session. This should work until the next reboot when the keyring
+which to request it. To avoid this, start a long-running D-Bus session (which
+may be as simple as `dbus-launch true`) and use `secret-tool` to
+unlock the keyring once in that session manually. Then, ensure the
+`DBUS_SESSION_BUS_ADDRESS` environment variable for the cron job is set to use
+that D-Bus session. This should work until the next reboot when the keyring
 will need to be unlocked again.
 
 In the case of an error, the script will display a message as to what stage it
