@@ -18,7 +18,8 @@ prerequisites listed below are also available.
 be available in the PATH:
 
   * [bash](https://www.gnu.org/software/bash/bash.html)
-  * [curl](https://curl.se/)
+  * [curl-impersonate](https://github.com/lwthiker/curl-impersonate), **or**
+  * [Docker](https://www.docker.com/)
   * [HTML Tidy](https://www.html-tidy.org/) (tidy)
   * [XMLStarlet](https://xmlstar.sourceforge.net/) (xmlstarlet)
   * a sendmail-compatible MTA (sendmail)
@@ -34,9 +35,7 @@ the account password, unless it is stored using *secret-tool* in which case it
 must be left empty. In that case, store the password by running the following
 command:
 
-```
-secret-tool store --label="SpeakOut Account" speakout-account "$account"
-```
+    secret-tool store --label="SpeakOut Account" speakout-account "$account"
 
 where `$account` is replaced by the account e-mail address. You will be
 prompted for the password and secret-tool will store it encrypted for later
@@ -61,6 +60,17 @@ it blank to have the script display the account information.
 
 Set `mailer` to a command that takes an e-mail message with headers on stdin
 and mails it. This defaults to `sendmail -oi -t`.
+
+Set `curl` to a curl-impersonate command. This defaults to `curl_ff109`.
+curl-impersonate is a version of curl that closely mimics the ways browsers
+perform requests; regular curl no longer works since March 2023. If you don't
+have curl-impersonate installed but do have Docker, you can set this to:
+
+    docker run --rm -v $curldir:$curldir lwthiker/curl-impersonate:0.5-ff curl_ff109
+
+to run curl-impersonate in a Docker container. The variable `$curldir` is
+automatically replaced by the temporary directory in which various files are
+placed that are needed by curl to perform a request.
 
 The `speakoutinforc` file is actually a Bourne shell script so shell quoting
 rules are in effect.
@@ -119,7 +129,7 @@ Daniel Fandrich <dan@coneharvesters.com>
 See more info at the
 [project home page](https://github.com/dfandrich/speakout-account-info/).
 
-This program is Copyright © 2022 Daniel Fandrich. It is distributed under the
-terms of the GNU General Public License as published by the Free Software
+This program is Copyright © 2022–2023 Daniel Fandrich. It is distributed under
+the terms of the GNU General Public License as published by the Free Software
 Foundation; either version 2 of the License, or (at your option) any later
 version.

@@ -21,3 +21,5 @@ lowmail=yes
 #quiet=yes
 # Set to a mailer that takes a complete message with headers on stdin; defaults to sendmail
 #mailer="sendmail -oi -t"
+# Set to a curl-impersonate command
+#curl="docker run --rm -v $curldir:$curldir lwthiker/curl-impersonate:0.5-ff curl_ff109"
