@@ -45,7 +45,7 @@ Set `recipient` to one or more comma-separated e-mail addresses which will be
 the recipients of the balance e-mails.
 
 Set `warnlimit` to the dollar amount below which an warning e-mail will be
-sent when the script is run. `lowmail` must be set to yes for an e-mail to
+sent when the script is run. `lowmail` must be set to `yes` for an e-mail to
 actually be sent.
 
 Set `lowmail` to `yes` to have the script send an e-mail whenever the balance
@@ -68,20 +68,20 @@ have curl-impersonate installed but do have Docker, you can set this to:
 
     docker run --rm -v $curldir:$curldir lwthiker/curl-impersonate:0.5-ff curl_ff109
 
-to run curl-impersonate in a Docker container. The variable `$curldir` is
-automatically replaced by the temporary directory in which various files are
-placed that are needed by curl to perform a request.
+to run curl-impersonate in a Docker container. The literal string `$curldir` is
+a variable that is automatically replaced by shell with the temporary directory
+in which various files are placed that are needed by curl to perform a request.
 
 The `speakoutinforc` file is actually a Bourne shell script so shell quoting
 rules are in effect.
 
 ## Running
 
-Please the file `speakout-account-info` somewhere in your PATH and execute it
+Place the file `speakout-account-info` somewhere in your PATH and execute it
 with `speakout-account-info`. By default, it will retrieve the account
 information and write out the phone number, balance in dollars, and balance
-expiry date on one line separated with spaces. There are a number command-line
-options available to change this behaviour.
+expiry date on one line separated with spaces. There are a number of
+command-line options available to change this behaviour.
 
 `--help` will show a brief list of options and the version number.
 
@@ -95,7 +95,7 @@ found in the configuration file.
 the configuration file.
 
 Note that the command-line processor is simplistic and if more than one
-command-line option is given, they must be given in the order above.
+command-line option is given, they must be given in the order given above.
 
 The script is well-suited to be run periodically as a cron job. This is
 straightforward when the password is found in the configuration file, but
@@ -110,7 +110,7 @@ that D-Bus session. This should work until the next reboot when the keyring
 will need to be unlocked again.
 
 In the case of an error, the script will display a message as to what stage it
-was in when the error occurred, and possible a more verbose error message from
+was in when the error occurred, and possibly a more verbose error message from
 a called program. The return code of the program will be non-zero in case of an
 error.
 
