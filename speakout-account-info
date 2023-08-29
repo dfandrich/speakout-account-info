@@ -18,7 +18,7 @@
 
 set -e
 
-readonly VERSION=2023.0.1-dev
+readonly VERSION=2023.1
 if [[ "$1" == "--help" ]]; then
     echo "Usage: $0 [--help] [--quiet] [--alwaysmail] [--lowmail]"
     echo "ver. $VERSION"
