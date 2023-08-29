@@ -20,6 +20,7 @@ be available in the PATH:
   * [bash](https://www.gnu.org/software/bash/bash.html)
   * [curl-impersonate](https://github.com/lwthiker/curl-impersonate), **or**
   * [Docker](https://www.docker.com/)
+  * [gawk](https://www.gnu.org/software/gawk/gawk.html) (gawk)
   * [HTML Tidy](https://www.html-tidy.org/) (tidy)
   * [XMLStarlet](https://xmlstar.sourceforge.net/) (xmlstarlet)
   * a sendmail-compatible MTA (sendmail)
@@ -48,8 +49,12 @@ Set `warnlimit` to the dollar amount below which an warning e-mail will be
 sent when the script is run. `lowmail` must be set to `yes` for an e-mail to
 actually be sent.
 
+Set `expirydays` to the number of days before expiry of the balance after which a
+warning e-mail will be sent. This defaults to 7. `lowmail` must be set to `yes`
+for an e-mail to actually be sent.
+
 Set `lowmail` to `yes` to have the script send an e-mail whenever the balance
-goes below `warnlimit`.
+goes below `warnlimit` or the expiry date is within `expirydays`.
 
 Set `alwaysmail` to `yes` to have the script send an e-mail every time it is
 run, regardless of the limit. Leave it blank to only mail below the warning

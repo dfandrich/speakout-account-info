@@ -12,6 +12,8 @@ recipient=$USER@localhost
 # Lower limit (in dollars) below which a warning e-mail is generated; defaults to 0
 # lowmail must be set to yes for an e-mail to actually be sent.
 warnlimit=5
+# Start warning this number of days before expiry
+expirydays=7
 # Send an e-mail when the balance goes below warnlimit
 lowmail=yes
 # Set to yes to always send an e-mail, regardless of warnlimit, empty to send

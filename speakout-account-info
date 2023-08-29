@@ -35,6 +35,7 @@ account=
 password=
 recipient=
 warnlimit=0
+expirydays=7
 alwaysmail=
 lowmail=
 quiet=
@@ -147,9 +148,23 @@ As of $(date), the balance remaining on the cellular number $NICEPHONENUM is
 <span style='font-size: medium'>\$$BALANCE</span> which expires $EXPIRY.
 EOF
 
+if awk -F/ -v EXPIRYDAYS="$expirydays" '{exit mktime($3 " " $1 " " $2 " 00 00 00") - systime() >= EXPIRYDAYS * 24*3600}' <<< "$EXPIRY"; then
+    readonly TIMEEXCEEDED=yes
+    cat >>"$CONTENTFILE" <<EOF
+        <span style='color: pink; font-weight: bold;'>This is expiring within $expirydays days!</span>
+EOF
+else
+    readonly TIMEEXCEEDED=
+fi
+
 if [[ -n "$LIMITEXCEEDED" ]]; then
     cat >>"$CONTENTFILE" <<EOF
         <span style='color: pink; font-weight: bold;'>This is below the warning threshold of \$$warnlimit!</span>
+EOF
+fi
+
+if [[ -n "$LIMITEXCEEDED" || -n "$TIMEEXCEEDED" ]]; then
+    cat >>"$CONTENTFILE" <<EOF
         <p>
         Add more money to your account now by
         <a href="https://www.speakout7eleven.ca/userinfo/activation/topup/an/$PHONENUM/">choosing an amount here</a>.
@@ -162,7 +177,7 @@ cat >>"$CONTENTFILE" <<EOF
 </body></html>
 EOF
 
-if [[ -n "$recipient" && ( -n "$alwaysmail" || ( -n "$lowmail" && -n "$LIMITEXCEEDED" ) ) ]]; then
+if [[ -n "$recipient" && ( -n "$alwaysmail" || ( -n "$lowmail" && ( -n "$LIMITEXCEEDED" || -n "$TIMEEXCEEDED" ) ) ) ]]; then
     STAGE='sending e-mail'
     (
     echo "To: $recipient"
