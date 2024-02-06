@@ -114,7 +114,9 @@ $curl --no-progress-meter --compressed --fail --retry 3 --max-time 90 --cookie-j
 
 STAGE='processing status information (wrong password?)'
 # Convert to xhtml for manipulation
-tidy -utf8 -asxml -numeric  -f /dev/null --output-file "$CONTENTFILE" "$CONTENTFILE" || test "$?" == 1
+# The sed is to get rid of what looks like some PHP that escaped onto the page in 2023-11
+sed -e 's@<?@<!--?@g' -e 's@?>@?-->@g' "$CONTENTFILE" | \
+tidy -utf8 -asxml -numeric  -f /dev/null --output-file "$CONTENTFILE" || test "$?" == 1
 
 BALANCE="$(xmlstarlet sel -N x=http://www.w3.org/1999/xhtml -t -v '//x:div[@class="act-bal"]/x:h2' "$CONTENTFILE")"
 # Strip off the dollar sign
