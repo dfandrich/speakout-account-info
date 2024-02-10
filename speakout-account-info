@@ -1,7 +1,7 @@
 #!/bin/bash
 # Retrieve balance information for a Canadian SpeakOut cellular account
 #
-# Copyright © 2022–2023 Daniel Fandrich.
+# Copyright © 2022–2024 Daniel Fandrich.
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -18,7 +18,7 @@
 
 set -e
 
-readonly VERSION=2023.2-dev
+readonly VERSION=2024.0
 if [[ "$1" == "--help" ]]; then
     echo "Usage: $0 [--help] [--quiet] [--alwaysmail] [--lowmail]"
     echo "ver. $VERSION"
