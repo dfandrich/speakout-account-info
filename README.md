@@ -10,6 +10,10 @@ installed (like [msys2](https://www.msys2.org/) or
 [WSL](https://learn.microsoft.com/en-us/windows/wsl/about)), as long as the
 prerequisites listed below are also available.
 
+Note that the author no longer uses this program and therefore will not be
+preemptively fixing any bugs. Patches are still welcome and new releases will
+still be made if warranted.
+
 7-Eleven SpeakOut Wireless™ is a registered trademark of 7-Eleven.
 
 ## Prerequisites
